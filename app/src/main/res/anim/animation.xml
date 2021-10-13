@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<set xmlns:android="http://schemas.android.com/apk/res/android">
+
+<!--    Translate Animation is Android is a used to apply the effect of Bounce, Move left, Move right,
+         Move Top, Move Bottom and Left to Right effect with the help of this animation.
+         An Alpha Animation is animation that controls the alpha level of an object, i.e. fading it in and out.
+ -->
+        <translate
+            android:fromXDelta="0%"
+            android:fromYDelta="-50%"
+            android:duration="3000"/>
+
+        <alpha
+            android:fromAlpha="0.0"
+            android:toAlpha="1.0"
+            android:duration="3000"/>
+
+</set>

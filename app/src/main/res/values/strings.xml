@@ -1,0 +1,21 @@
+<resources>
+    <string name="app_name">Expense Tracker</string>
+    <string name="already_have_an_account_login">Already have an account? <u>Login</u></string>
+    <string name="don_t_have_an_account_signup">Don\'t have an account, <u>SignUp</u></string>
+    
+    <string-array name="items" >
+
+        <item>Select Item</item>
+        <item>Transport</item>
+        <item>Food</item>
+        <item>House</item>
+        <item>Entertainment</item>
+        <item>Education</item>
+        <item>Charity</item>
+        <item>Apparel</item>
+        <item>Health</item>
+        <item>Personal</item>
+        <item>Other</item>
+
+    </string-array>
+</resources>
