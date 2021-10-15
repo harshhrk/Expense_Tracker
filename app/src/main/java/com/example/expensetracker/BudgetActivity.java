@@ -1,29 +1,33 @@
 package com.example.expensetracker;
 
+import android.app.ProgressDialog;
+import android.os.Bundle;
+import android.text.TextUtils;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.Spinner;
+import android.widget.TextView;
+import android.widget.Toast;
+
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import android.app.ProgressDialog;
-import android.os.Bundle;
-import android.text.TextUtils;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.Spinner;
-import android.widget.TextView;
-import android.widget.Toast;
-
+import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.firebase.ui.database.FirebaseRecyclerOptions;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import org.joda.time.DateTime;
 import org.joda.time.Months;
@@ -62,11 +66,29 @@ public class BudgetActivity extends AppCompatActivity {
         recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(linearLayoutManager);
 
+        budgetRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                int totalAmt = 0;
+
+                for (DataSnapshot snap : snapshot.getChildren()) {
+                    Data data = snap.getValue(Data.class);
+                    assert data != null;
+                    totalAmt += data.getAmount();
+                    String sTotal = "Month budget: Rs " + totalAmt;
+                    totalAmount.setText(sTotal);
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+
         fap = findViewById(R.id.fap);
 
-        fap.setOnClickListener(view -> {
-            addItem();
-        });
+        fap.setOnClickListener(view -> addItem());
     }
 
     private void addItem() {
@@ -127,9 +149,7 @@ public class BudgetActivity extends AppCompatActivity {
             dialog.dismiss();
         });
 
-        cancelBtn.setOnClickListener(view -> {
-            dialog.dismiss();
-        });
+        cancelBtn.setOnClickListener(view -> dialog.dismiss());
     }
 
     @Override
@@ -139,7 +159,102 @@ public class BudgetActivity extends AppCompatActivity {
         FirebaseRecyclerOptions<Data> options = new FirebaseRecyclerOptions.Builder<Data>()
                 .setQuery(budgetRef, Data.class)
                 .build();
+
+        FirebaseRecyclerAdapter<Data, ViewHolder> adapter = new FirebaseRecyclerAdapter<Data, ViewHolder>(options) {
+            @Override
+            protected void onBindViewHolder(@NonNull ViewHolder holder, int position, @NonNull Data model) {
+
+                holder.setItemAmount("Allocated Amount: Rs " + model.getAmount());
+                holder.setDate("On: " + model.getDate());
+                holder.setItemName("Budget item: " + model.getItem());
+                holder.notes.setVisibility(View.GONE);
+
+                switch (model.getItem()) {
+                    case "Transport" :
+                        holder.imageView.setImageResource(R.drawable.ic_transport);
+                        break;
+
+                    case "Food" :
+                        holder.imageView.setImageResource(R.drawable.ic_food);
+                        break;
+
+                    case "House" :
+                        holder.imageView.setImageResource(R.drawable.ic_house);
+                        break;
+
+                    case "Entertainment" :
+                        holder.imageView.setImageResource(R.drawable.ic_entertainment);
+                        break;
+
+                    case "Education" :
+                        holder.imageView.setImageResource(R.drawable.ic_education);
+                        break;
+
+                    case "Charity" :
+                        holder.imageView.setImageResource(R.drawable.ic_consultancy);
+                        break;
+
+                    case "Apparel" :
+                        holder.imageView.setImageResource(R.drawable.ic_shirt);
+                        break;
+
+                    case "Health" :
+                        holder.imageView.setImageResource(R.drawable.ic_health);
+                        break;
+
+                    case "Personal" :
+                        holder.imageView.setImageResource(R.drawable.ic_personalcare);
+                        break;
+
+                    case "Other" :
+                        holder.imageView.setImageResource(R.drawable.ic_other);
+                        break;
+                }
+
+            }
+
+            @NonNull
+            @Override
+            public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+                View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.retrieve_layout, parent, false);
+                return new ViewHolder(view);
+            }
+        };
+
+        recyclerView.setAdapter(adapter);
+        adapter.startListening();
+        adapter.notify();
     }
 
+    public static class ViewHolder extends RecyclerView.ViewHolder {
 
+        View view;
+        public ImageView imageView;
+        public  TextView notes;
+
+        public ViewHolder(@NonNull View itemView) {
+            super(itemView);
+
+            view = itemView;
+            imageView = itemView.findViewById(R.id.image_retrieveLayout);
+            notes = itemView.findViewById(R.id.note_retrieveLayout);
+        }
+
+        public void setItemName (String itemName) {
+            TextView item = view.findViewById(R.id.item_retrieveLayout);
+            item.setText(itemName);
+        }
+
+        public void setItemAmount (String itemAmount) {
+            TextView amount = view.findViewById(R.id.amount_retrieveLayout);
+            amount.setText(itemAmount);
+        }
+
+        public void setDate (String itemDate) {
+            TextView date = view.findViewById(R.id.date_retrieveLayout);
+            date.setText(itemDate);
+        }
+
+
+    }
 }
